@@ -40,7 +40,8 @@ import Mooc.Todo
 --   buildList 7 0 3 ==> [3]
 
 buildList :: Int -> Int -> Int -> [Int]
-buildList start count end = todo
+buildList start count end = buildRec start 0 count end
+  where buildRec start count maxCount end = if count < maxCount then start : (buildRec start (count + 1) maxCount end) else end : []
 
 ------------------------------------------------------------------------------
 -- Ex 2: given i, build the list of sums [1, 1+2, 1+2+3, .., 1+2+..+i]
@@ -50,7 +51,8 @@ buildList start count end = todo
 -- Ps. you'll probably need a recursive helper function
 
 sums :: Int -> [Int]
-sums i = todo
+sums i = buildRec 1 i 0
+  where buildRec count maxCount prev = if count < maxCount then (prev + count) : (buildRec (count + 1) maxCount (prev + count)) else (prev + count) : []
 
 ------------------------------------------------------------------------------
 -- Ex 3: define a function mylast that returns the last value of the
@@ -64,7 +66,8 @@ sums i = todo
 --   mylast 0 [1,2,3] ==> 3
 
 mylast :: a -> [a] -> a
-mylast def xs = todo
+mylast def [] = def
+mylast def (e : l) = mylast e l
 
 ------------------------------------------------------------------------------
 -- Ex 4: safe list indexing. Define a function indexDefault so that
@@ -85,7 +88,8 @@ mylast def xs = todo
 --   indexDefault ["a","b","c"] (-1) "d" ==> "d"
 
 indexDefault :: [a] -> Int -> a -> a
-indexDefault xs i def = todo
+indexDefault [] i def = def
+indexDefault (e : l) i def = if i > 0 then indexDefault l (i - 1) def else e
 
 ------------------------------------------------------------------------------
 -- Ex 5: define a function that checks if the given list is in
@@ -94,7 +98,10 @@ indexDefault xs i def = todo
 -- Use pattern matching and recursion to iterate through the list.
 
 sorted :: [Int] -> Bool
-sorted xs = todo
+sorted [] = True
+sorted (e:l) = sortedRec l e
+  where sortedRec [] prev = True
+        sortedRec (e:l) prev = if e >= prev then sortedRec l e else False
 
 ------------------------------------------------------------------------------
 -- Ex 6: compute the partial sums of the given list like this:
@@ -106,7 +113,10 @@ sorted xs = todo
 -- Use pattern matching and recursion (and the list constructors : and [])
 
 sumsOf :: [Int] -> [Int]
-sumsOf xs = todo
+sumsOf [] = []
+sumsOf (e:l) = sumsOfRec l e
+  where sumsOfRec [] prev = prev : []
+        sumsOfRec (e:l) prev = prev : (sumsOfRec l (prev + e))
 
 ------------------------------------------------------------------------------
 -- Ex 7: implement the function merge that merges two sorted lists of
@@ -119,7 +129,10 @@ sumsOf xs = todo
 --   merge [1,1,6] [1,2]   ==> [1,1,1,2,6]
 
 merge :: [Int] -> [Int] -> [Int]
-merge xs ys = todo
+merge [] [] = []
+merge l1 [] = l1
+merge [] l2 = l2
+merge (e1:l1) (e2:l2) = if e1 < e2 then e1:(merge l1 (e2:l2)) else e2:(merge (e1:l1) l2)
 
 ------------------------------------------------------------------------------
 -- Ex 8: define the function mymaximum that takes a list and a
@@ -138,7 +151,8 @@ merge xs ys = todo
 --     ==> [1,2]
 
 mymaximum :: (a -> a -> Bool) -> a -> [a] -> a
-mymaximum bigger initial xs = todo
+mymaximum bigger initial [] = initial
+mymaximum bigger initial (e:l) = if bigger e initial then mymaximum bigger e l else mymaximum bigger initial l
 
 ------------------------------------------------------------------------------
 -- Ex 9: define a version of map that takes a two-argument function
@@ -152,7 +166,9 @@ mymaximum bigger initial xs = todo
 -- Use recursion and pattern matching. Do not use any library functions.
 
 map2 :: (a -> b -> c) -> [a] -> [b] -> [c]
-map2 f as bs = todo
+map2 f as [] = []
+map2 f [] bs = []
+map2 f (ea:as) (eb:bs) = (f ea eb):(map2 f as bs)
 
 
 ------------------------------------------------------------------------------
@@ -177,4 +193,7 @@ map2 f as bs = todo
 --   ==> []
 
 maybeMap :: (a -> Maybe b) -> [a] -> [b]
-maybeMap f xs = todo
+maybeMap f [] = []
+maybeMap f (e:l) = matchMaybe (f e)
+  where matchMaybe (Just b) = (b:(maybeMap f l))
+        matchMaybe Nothing = maybeMap f l
